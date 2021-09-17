@@ -19,8 +19,9 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor() : ViewModel() {
 
     val ldIsAnyButtonPressed = MutableLiveData(false)
-
     val ldImage = MutableLiveData<ModelResponse>()
+    val ldLastClickTime = MutableLiveData(System.currentTimeMillis())
+    val ldLastCountClicks = MutableLiveData(0)
 
     @Inject
     lateinit var catsImagesRepository: CatsImagesRepository
@@ -57,6 +58,19 @@ class MainViewModel @Inject constructor() : ViewModel() {
 
     fun setIsAnyButtonPressedValue(value: Boolean) {
         ldIsAnyButtonPressed.value = value
+    }
+
+    fun setLastClickTimeValue(value: Long) {
+        ldLastClickTime.value = value
+    }
+    fun getLastClickTimeValue(): Long = ldLastClickTime.value ?: throw RuntimeException("LiveData is not init!")
+
+    fun setLastCountClicksValue(value: Int) {
+        ldLastCountClicks.value = value
+    }
+    fun getLastCountClicksValue(): Int = ldLastCountClicks.value ?:throw RuntimeException("LiveData is not init!")
+    fun addLastCountClicksValue() {
+        ldLastCountClicks.value = ldLastCountClicks.value?.plus(1)
     }
 
     //=================================================================

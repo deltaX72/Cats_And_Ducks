@@ -2,19 +2,20 @@ package com.litil.catsandducks.presentation.fragments
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import com.litil.catsandducks.R
 import com.litil.catsandducks.presentation.viewmodels.MainViewModel
 
 class AfterShiftFragment(
     val viewModel: MainViewModel
-): Fragment() {
+) : Fragment() {
 
     private lateinit var ivImage: ImageView
     private lateinit var btnShowCat: AppCompatButton
@@ -37,6 +38,12 @@ class AfterShiftFragment(
         viewModel.ldImage.observe(viewLifecycleOwner) {
             viewModel.loadImage(it, ivImage)
         }
+        viewModel.ldLastClickTime.observe(viewLifecycleOwner) {
+
+        }
+        viewModel.ldLastCountClicks.observe(viewLifecycleOwner) {
+
+        }
 
         btnShowCat.setOnClickListener {
             viewModel.downloadCatImage()
@@ -44,6 +51,20 @@ class AfterShiftFragment(
         btnShowDuck.setOnClickListener {
             viewModel.downloadDuckImage()
         }
+
+        ivImage.setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - viewModel.getLastClickTimeValue() < 1000) {
+                if (viewModel.getLastCountClicksValue() == 1) {
+                    viewModel.setLastCountClicksValue(1)
+                    Toast.makeText(context, "You liked this image!", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                viewModel.setLastCountClicksValue(1)
+                viewModel.setLastClickTimeValue(System.currentTimeMillis())
+            }
+        }
+
         return view
     }
 }
