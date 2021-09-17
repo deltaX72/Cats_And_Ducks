@@ -6,6 +6,6 @@ import retrofit2.http.GET
 
 interface DucksImagesService {
 
-    @GET("random/")
+    @GET("random")
     fun download(): Single<DuckImageResponse>
 }

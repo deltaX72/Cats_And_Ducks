@@ -10,7 +10,7 @@ interface DucksImagesRepository {
     fun downloadImage(): Single<DuckImageResponse>
 }
 
-class DuckImagesRepositoryImpl @Inject constructor(
+class DucksImagesRepositoryImpl @Inject constructor(
     val service: DucksImagesService
 ): DucksImagesRepository {
     override fun downloadImage(): Single<DuckImageResponse> {

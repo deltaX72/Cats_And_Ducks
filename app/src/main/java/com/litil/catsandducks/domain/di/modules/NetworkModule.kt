@@ -15,6 +15,7 @@ import retrofit2.create
 
 @Module
 class NetworkModule {
+
     @Provides
     fun provideCatsImagesService(): CatsImagesService {
         val retrofit = Retrofit.Builder()
