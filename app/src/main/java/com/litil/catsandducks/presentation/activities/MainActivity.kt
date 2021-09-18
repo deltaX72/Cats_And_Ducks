@@ -1,89 +1,84 @@
 package com.litil.catsandducks.presentation.activities
 
 import android.os.Bundle
+import android.view.View
 import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
 import com.litil.appComponent
 import com.litil.catsandducks.R
-import com.litil.catsandducks.domain.models.CatImageResponse
-import com.litil.catsandducks.domain.models.DuckImageResponse
+import com.litil.catsandducks.databinding.ActivityMainBinding
 import com.litil.catsandducks.presentation.fragments.AfterShiftFragment
 import com.litil.catsandducks.presentation.fragments.BeforeShiftFragment
-import com.litil.catsandducks.presentation.fragments.MainFragment
+import com.litil.catsandducks.presentation.fragments.navigation.Navigator
+import com.litil.catsandducks.presentation.utils.Options
 import com.litil.catsandducks.presentation.viewmodels.MainViewModel
-import java.lang.RuntimeException
-import javax.inject.Inject
+import dagger.android.support.DaggerAppCompatActivity
 
-class MainActivity : AppCompatActivity() {
-    private lateinit var container: FrameLayout
-    private lateinit var fragmentBeforeShift: BeforeShiftFragment
-    private lateinit var fragmentAfterShift: AfterShiftFragment
+class MainActivity : AppCompatActivity(), Navigator {
+    private lateinit var binding: ActivityMainBinding
 
-    private val BEFORE_SHIFT_FRAGMENT_TAG = "BEFORE_SHIFT_FRAGMENT_TAG"
-    private val AFTER_SHIFT_FRAGMENT_TAG = "AFTER_SHIFT_FRAGMENT_TAG"
+    private val currentFragment: Fragment
+        get() = supportFragmentManager.findFragmentById(R.id.container)!!
 
-    @Inject
-    lateinit var viewModel: MainViewModel
+//    private val viewModel: MainViewModel by viewModels {
+//        MainViewModel.Factory()
+//    }
+
+    private val fragmentListener = object : FragmentManager.FragmentLifecycleCallbacks() {
+        override fun onFragmentViewCreated(
+            fm: FragmentManager,
+            f: Fragment,
+            v: View,
+            savedInstanceState: Bundle?
+        ) {
+            super.onFragmentViewCreated(fm, f, v, savedInstanceState)
+            updateUI()
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         appComponent.inject(this)
+        super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_main)
-        container = findViewById(R.id.container)
-
-        fragmentBeforeShift = BeforeShiftFragment(viewModel)
-        fragmentAfterShift = AfterShiftFragment(viewModel)
+        binding = ActivityMainBinding.inflate(layoutInflater).also {
+            setContentView(it.root)
+        }
 
         if (savedInstanceState == null) {
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction.add(
-                R.id.container,
-                fragmentBeforeShift,
-                BEFORE_SHIFT_FRAGMENT_TAG
-            )
-            fragmentTransaction.commit()
+            supportFragmentManager
+                .beginTransaction()
+                .add(R.id.container, BeforeShiftFragment())
+                .commit()
         }
 
-        viewModel.ldIsAnyButtonPressed.observe(this) {
-            if (it) {
-                replaceFragments(R.id.container, fragmentAfterShift, AFTER_SHIFT_FRAGMENT_TAG)
-            }
-        }
+        supportFragmentManager.registerFragmentLifecycleCallbacks(fragmentListener, false)
     }
 
-    private fun replaceFragments(containerId: Int, fragment: Fragment, tag: String) {
-        if (supportFragmentManager.findFragmentByTag(tag) == null) {
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction.replace(
-                containerId,
-                fragment,
-                tag
-            )
-            fragmentTransaction.commit()
-        } else {
-            throw RuntimeException("Fragment is not initialized!")
-        }
+    override fun onDestroy() {
+        super.onDestroy()
+        supportFragmentManager.unregisterFragmentLifecycleCallbacks(fragmentListener)
     }
 
-    private fun replaceFragments() {
-        val fragment = supportFragmentManager.findFragmentByTag(fragmentAfterShift.tag)
-        if (fragment == null) {
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction.replace(
-                R.id.container,
-                fragmentAfterShift,
-                fragmentAfterShift.tag
-            )
-            fragmentTransaction.commit()
-            Toast.makeText(this, "fragmentAfterShift has been created", Toast.LENGTH_SHORT).show()
-        } else {
-            Toast.makeText(this, "fragmentAfterShift has already created", Toast.LENGTH_SHORT).show()
-        }
+    private fun startFragment(fragment: Fragment) {
+        supportFragmentManager
+            .beginTransaction()
+            .replace(R.id.container, fragment)
+            .commit()
+    }
+
+    private fun updateUI() {
+
+    }
+
+    override fun showImage(options: Options) {
+        startFragment(AfterShiftFragment.instance(options))
+    }
+
+    override fun showFavourites() {
+
     }
 }

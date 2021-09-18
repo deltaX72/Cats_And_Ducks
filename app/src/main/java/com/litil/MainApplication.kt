@@ -5,13 +5,14 @@ import android.content.Context
 import com.litil.catsandducks.domain.di.components.AppComponent
 import com.litil.catsandducks.domain.di.components.DaggerAppComponent
 
-class MainApplication: Application() {
+class MainApplication : Application() {
     lateinit var appComponent: AppComponent
         private set
 
     override fun onCreate() {
         super.onCreate()
-        appComponent = DaggerAppComponent.create()
+        appComponent = DaggerAppComponent
+            .create()
     }
 }
 

@@ -3,6 +3,7 @@ package com.litil.catsandducks.data.repositories
 import com.litil.catsandducks.data.services.CatsImagesService
 import com.litil.catsandducks.domain.models.CatImageResponse
 import io.reactivex.Single
+import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.schedulers.Schedulers
 import javax.inject.Inject
 

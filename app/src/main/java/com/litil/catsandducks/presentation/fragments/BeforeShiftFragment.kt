@@ -1,54 +1,53 @@
 package com.litil.catsandducks.presentation.fragments
 
-import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import androidx.appcompat.widget.AppCompatButton
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import com.litil.catsandducks.R
-import com.litil.catsandducks.presentation.activities.MainActivity
+import androidx.fragment.app.viewModels
+import com.litil.appComponent
+import com.litil.catsandducks.databinding.FragmentBeforeShiftBinding
+import com.litil.catsandducks.presentation.fragments.navigation.navigator
+import com.litil.catsandducks.presentation.utils.ClickedButton
+import com.litil.catsandducks.presentation.utils.Options
 import com.litil.catsandducks.presentation.viewmodels.MainViewModel
+import javax.inject.Inject
 
-class BeforeShiftFragment(
-    val viewModel: MainViewModel
-): Fragment() {
+class BeforeShiftFragment : Fragment() {
 
-    private lateinit var ivImage: ImageView
-    private lateinit var btnShowCat: AppCompatButton
-    private lateinit var btnShowDuck: AppCompatButton
-
-//    private val viewModel: MainViewModel by activityViewModels()
-
-    @SuppressLint("InflateParams")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        val view = inflater.inflate(R.layout.fragment_before_shift, null)
+    ): View {
 
-        ivImage = view.findViewById(R.id.ivImage)
-        btnShowCat = view.findViewById(R.id.btnShowCat)
-        btnShowDuck = view.findViewById(R.id.btnShowDuck)
+        val binding = FragmentBeforeShiftBinding.inflate(inflater, container, false)
 
-        // required?
-        viewModel.ldImage.observe(viewLifecycleOwner) {
-            viewModel.loadImage(it, ivImage)
+        binding.apply {
+            btnShowCat.setOnClickListener { downloadCatImage() }
+            btnShowDuck.setOnClickListener { downloadDuckImage() }
         }
 
-        btnShowCat.setOnClickListener {
-            viewModel.setIsAnyButtonPressedValue(true)
-            viewModel.downloadCatImage()
-        }
-        btnShowDuck.setOnClickListener {
-            viewModel.setIsAnyButtonPressedValue(true)
-            viewModel.downloadDuckImage()
-        }
+        return binding.root
+    }
 
-        return view
+    override fun onAttach(context: Context) {
+        context.appComponent.inject(this)
+        super.onAttach(context)
+    }
+
+    private fun downloadCatImage() {
+        showImage(Options(ClickedButton.SHOW_CAT))
+    }
+
+    private fun downloadDuckImage() {
+        showImage(Options(ClickedButton.SHOW_DUCK))
+    }
+
+    private fun showImage(options: Options) {
+        navigator().showImage(options)
     }
 }
