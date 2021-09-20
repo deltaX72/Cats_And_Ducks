@@ -1,11 +1,9 @@
 package com.litil.catsandducks.domain.di.modules
 
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.litil.catsandducks.data.repositories.CatsImagesRepository
-import com.litil.catsandducks.data.repositories.CatsImagesRepositoryImpl
-import com.litil.catsandducks.data.repositories.DucksImagesRepository
-import com.litil.catsandducks.data.repositories.DucksImagesRepositoryImpl
+import com.litil.catsandducks.data.repositories.*
 import com.litil.catsandducks.presentation.fragments.AfterShiftFragment
 import com.litil.catsandducks.presentation.fragments.BeforeShiftFragment
 import com.litil.catsandducks.presentation.viewmodels.MainViewModel
@@ -29,20 +27,15 @@ interface BindModule {
     fun bindDucksImagesRepository(repository: DucksImagesRepositoryImpl): DucksImagesRepository
 
     @Binds
+    fun bindImagesDatabaseRepository(repository: ImagesDatabaseRepositoryImpl): ImagesDatabaseRepository
+
+    @Binds
     @IntoMap
     @ViewModelKey(MainViewModel::class)
     fun bindMainViewModel(viewModel: MainViewModel): ViewModel
 
     @Binds
     fun bindMainViewModelFactory(factory: MainViewModel.Factory): ViewModelProvider.Factory
-
-//    @FragmentScope
-//    @ContributesAndroidInjector
-//    fun provideBeforeShiftFragment(): BeforeShiftFragment
-//
-//    @FragmentScope
-//    @ContributesAndroidInjector
-//    fun provideAfterShiftFragment(): AfterShiftFragment
 }
 
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)

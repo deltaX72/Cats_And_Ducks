@@ -6,9 +6,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatButton
+import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
@@ -19,14 +18,23 @@ import com.litil.catsandducks.presentation.utils.Options
 import com.litil.catsandducks.presentation.viewmodels.MainViewModel
 import javax.inject.Inject
 
-class AfterShiftFragment: Fragment() {
+class AfterShiftFragment : Fragment() {
 
     @Inject
     lateinit var factory: MainViewModel.Factory
 
-    private val viewModel: MainViewModel by viewModels {
+    private val viewModel: MainViewModel by activityViewModels {
         factory
     }
+
+    private lateinit var binding: FragmentAfterShiftBinding
+
+//    @Inject
+//    lateinit var factory: MainViewModel.Factory
+//
+//    private val viewModel by requireActivity().viewModels<MainViewModel> {
+//        factory
+//    }
 
     private lateinit var options: Options
 
@@ -37,11 +45,11 @@ class AfterShiftFragment: Fragment() {
         savedInstanceState: Bundle?
     ): View {
         options = savedInstanceState
-            ?.getParcelable(KEY) ?:
-            arguments?.getParcelable(ARG) ?:
-            throw IllegalArgumentException("Error!")
+            ?.getParcelable(KEY) ?: arguments?.getParcelable(ARG) ?: throw IllegalArgumentException(
+            "Error!"
+        )
 
-        val binding = FragmentAfterShiftBinding.inflate(inflater, container, false)
+        binding = FragmentAfterShiftBinding.inflate(inflater, container, false)
 
         binding.apply {
             btnShowCat.setOnClickListener { onShowCatButtonClicked() }
@@ -49,8 +57,12 @@ class AfterShiftFragment: Fragment() {
             ivImage.setOnClickListener { onImageClicked() }
         }
 
-        viewModel.ldImage.observe(viewLifecycleOwner) {
+        viewModel.ldModelResponse.observe(viewLifecycleOwner) {
             viewModel.loadImageFromModel(it, binding.ivImage)
+        }
+
+        viewModel.ldImageView.observe(viewLifecycleOwner) {
+            binding.ivImage.setImageDrawable(it.drawable)
         }
 
         when (options.clickedButton) {
@@ -81,11 +93,18 @@ class AfterShiftFragment: Fragment() {
     }
 
     private fun onImageClicked() {
+        checkDoubleClickedImage {
+            Toast.makeText(context, "You liked this image!", Toast.LENGTH_SHORT).show()
+            viewModel.saveImage(binding.ivImage)
+        }
+    }
+
+    private inline fun checkDoubleClickedImage(content: () -> Unit) {
         val currentTime = System.currentTimeMillis()
         if (currentTime - viewModel.getLastClickTimeValue() < 1000) {
             if (viewModel.getLastCountClicksValue() == 1) {
                 viewModel.setLastCountClicksValue(1)
-                Toast.makeText(context, "You liked this image!", Toast.LENGTH_SHORT).show()
+                content.invoke()
             }
         } else {
             viewModel.setLastCountClicksValue(1)
@@ -96,6 +115,7 @@ class AfterShiftFragment: Fragment() {
     companion object {
         @JvmStatic
         private val ARG = "ARG"
+
         @JvmStatic
         private val KEY = "KEY"
 

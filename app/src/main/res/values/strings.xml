@@ -3,4 +3,6 @@
     <string name="show_cat_text">Show cat</string>
     <string name="show_duck_text">Show duck</string>
     <string name="no_image_text">Nothing</string>
+    <string name="main_menu_botNav_text">Main menu</string>
+    <string name="favourites_botNav_text">Favourites</string>
 </resources>
