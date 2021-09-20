@@ -1,7 +1,5 @@
 package com.litil.catsandducks.presentation.viewmodels
 
-import android.graphics.Bitmap
-import android.graphics.drawable.BitmapDrawable
 import android.util.Log
 import android.widget.ImageView
 import androidx.lifecycle.MutableLiveData
@@ -14,11 +12,11 @@ import com.litil.catsandducks.domain.models.CatImageResponse
 import com.litil.catsandducks.domain.models.DuckImageResponse
 import com.litil.catsandducks.domain.models.ModelResponse
 import com.litil.catsandducks.domain.models.db.ImageModel
+import com.litil.catsandducks.presentation.utils.convertImageViewToByteArray
 import com.squareup.picasso.Picasso
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.disposables.Disposable
-import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 class MainViewModel @Inject constructor(
@@ -63,16 +61,13 @@ class MainViewModel @Inject constructor(
     }
 
     fun saveImage(imageView: ImageView) {
-        val bitmap = (imageView.drawable as BitmapDrawable).bitmap
-        val outputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
-        val array = outputStream.toByteArray()
+        val array = convertImageViewToByteArray(imageView)
 
         imagesDatabaseRepository.getAllImages()
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
+            .subscribe({ list ->
                 val id = try {
-                    it.last().id + 1
+                    list.last().id + 1
                 } catch (ex: NoSuchElementException) {
                     0
                 }
@@ -100,7 +95,21 @@ class MainViewModel @Inject constructor(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 ldImageModelList.value = it
-            }, {})
+            }, {
+                Log.e("LOG_TAG GET ALL", it.stackTraceToString())
+            })
+            .untilDestroyed()
+    }
+
+    fun deleteImage(image: ByteArray) {
+        imagesDatabaseRepository.deleteImage(image)
+            .subscribeOn(AndroidSchedulers.mainThread())
+            .subscribe({
+                getAllImagesFromDatabase()
+            }, {
+                getAllImagesFromDatabase()
+                Log.e("LOG_TAG DELETE", it.stackTraceToString())
+            })
             .untilDestroyed()
     }
 
@@ -108,26 +117,16 @@ class MainViewModel @Inject constructor(
         ldLastClickTime.value = value
     }
 
-    fun getLastClickTimeValue(): Long =
-        ldLastClickTime.value ?: throw RuntimeException("LiveData is not init!")
+    fun getLastClickTimeValue(): Long {
+        return ldLastClickTime.value ?: throw RuntimeException("LiveData is not init!")
+    }
 
     fun setLastCountClicksValue(value: Int) {
         ldLastCountClicks.value = value
     }
 
-    fun getLastCountClicksValue(): Int =
-        ldLastCountClicks.value ?: throw RuntimeException("LiveData is not init!")
-
-    fun addLastCountClicksValue() {
-        ldLastCountClicks.value = ldLastCountClicks.value?.plus(1)
-    }
-
-    fun getImageViewValue(): ImageView? {
-        return ldImageView.value
-    }
-
-    fun setImageViewValue(value: ImageView) {
-        ldImageView.value = value
+    fun getLastCountClicksValue(): Int {
+        return ldLastCountClicks.value ?: throw RuntimeException("LiveData is not init!")
     }
 
     //=================================================================

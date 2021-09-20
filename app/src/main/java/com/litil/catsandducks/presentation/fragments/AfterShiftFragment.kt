@@ -29,13 +29,6 @@ class AfterShiftFragment : Fragment() {
 
     private lateinit var binding: FragmentAfterShiftBinding
 
-//    @Inject
-//    lateinit var factory: MainViewModel.Factory
-//
-//    private val viewModel by requireActivity().viewModels<MainViewModel> {
-//        factory
-//    }
-
     private lateinit var options: Options
 
     @SuppressLint("InflateParams")
@@ -54,7 +47,7 @@ class AfterShiftFragment : Fragment() {
         binding.apply {
             btnShowCat.setOnClickListener { onShowCatButtonClicked() }
             btnShowDuck.setOnClickListener { onShowDuckButtonClicked() }
-            ivImage.setOnClickListener { onImageClicked() }
+            ivImage.setOnClickListener { onImageViewDoubleClicked() }
         }
 
         viewModel.ldModelResponse.observe(viewLifecycleOwner) {
@@ -92,19 +85,13 @@ class AfterShiftFragment : Fragment() {
         viewModel.downloadDuckImage()
     }
 
-    private fun onImageClicked() {
-        checkDoubleClickedImage {
-            Toast.makeText(context, "You liked this image!", Toast.LENGTH_SHORT).show()
-            viewModel.saveImage(binding.ivImage)
-        }
-    }
-
-    private inline fun checkDoubleClickedImage(content: () -> Unit) {
+    private fun onImageViewDoubleClicked() {
         val currentTime = System.currentTimeMillis()
         if (currentTime - viewModel.getLastClickTimeValue() < 1000) {
             if (viewModel.getLastCountClicksValue() == 1) {
                 viewModel.setLastCountClicksValue(1)
-                content.invoke()
+                Toast.makeText(context, "You liked this image!", Toast.LENGTH_SHORT).show()
+                viewModel.saveImage(binding.ivImage)
             }
         } else {
             viewModel.setLastCountClicksValue(1)

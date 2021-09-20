@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -35,7 +36,9 @@ class FavouritesFragment: Fragment() {
 //        factory
 //    }
 
-    private val adapter = FavouritesAdapter()
+    private val adapter = FavouritesAdapter {
+        onImageViewDoubleClicked(it)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,5 +64,9 @@ class FavouritesFragment: Fragment() {
 
     private fun loadImages(list: List<ImageModel>) {
         adapter.imagesList = list
+    }
+
+    private fun onImageViewDoubleClicked(imageModel: ImageModel) {
+        viewModel.deleteImage(imageModel.image)
     }
 }
